@@ -2,29 +2,13 @@ rm(list = ls(all.names = TRUE))
 
 ########## Load libraries ##########
 library("tidyverse")
-library("edgeR")
-library("DESeq2")
 library("dplyr")
 library("readr")
 library("ggplot2")
 library("pheatmap")
-library("RColorBrewer")
-library("apeglm")
-library("ashr")
-library("DEGreport")
-library("ggfortify")
-library("GenomicRanges")
-library("glue")
-library("ggrepel")
-library("EnhancedVolcano")
-library("datawizard")
 library("msigdbr")
 library("clusterProfiler")
 library("enrichplot")
-library("RColorBrewer")
-library("fgsea")
-library("biomaRt")
-library("ggupset")
 library("plyr")
 ########## Load libraries ##########
 
@@ -34,7 +18,7 @@ files_dge <- list.files(path = dirIn, pattern = ".tsv")
 file_gmt <- "resource/ref/msigdb_v2024.1.Hs_GMTs/c5.all.v2024.1.Hs.symbols.gmt"
 rds_path <- "resource/ref/msigdb_v2024.1.Hs_GMTs/" 
 
-#files_dge <- list.files(path = dirIn, pattern = ".tsv")  
+files_dge <- list.files(path = dirIn, pattern = ".tsv")  
 
 for(file in files_dge){
   df <- read_tsv(file = paste0(dirIn, file))
@@ -82,7 +66,7 @@ for(file in files_dge){
   res_df <- res_df[res_df$ID %in% target, ]
 
 
-  print('Saving clusterprofiler results')
+  print(paste0('Saving clusterprofiler results ', filename_cut))
   write.csv(x = res_df, 
             file = paste0(filename, '_resclusterp.csv'),
             row.names = FALSE)
@@ -102,10 +86,24 @@ for(file in files_dge){
                  geneSets = bg_genes)
 
   
-  
-  #barplot(enrichres, showCategory = 15)
-  #dotplot(enrichres, showCategory = 15) + ggtitle("D1 vs Dm14")
+  try({
+    dirPlot <- paste0("workflow/results/DESeq2/clusterProfiler/plot/")
+    if(!file.exists(dirPlot)) { dir.create(path = dirPlot, recursive = TRUE) }
 
-  #enrichres2 <- pairwise_termsim(enrichres)
-  #treeplot(enrichres2)
+    barPlot <- graphics::barplot(enrichres, showCategory = 15) + ggtitle(filename_cut)
+    dotPlot <- enrichplot::dotplot(enrichres, showCategory = 15) + ggtitle(filename_cut)
+  
+  
+    print(paste0('Saving plots ', filename_cut))
+  
+    ggsave(filename = paste0(dirPlot, filename_cut, "_barplot.png"), plot = barPlot)
+    ggsave(filename = paste0(dirPlot, filename_cut, "_dotplot.png"), plot = dotPlot)
+    
+
+  
+    enrichres2 <- pairwise_termsim(enrichres)
+    treePlot <- enrichplot::treeplot(enriches2)
+    ggsave(filename = paste0(dirPlot, filename_cut, "_treeplot.png"), plot = treePlot)
+  
+  })
 }

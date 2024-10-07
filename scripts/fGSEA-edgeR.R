@@ -26,6 +26,9 @@ library("fgsea")
 library("biomaRt")
 ########## Load libraries ##########
 
+
+
+
 folder <- "workflow/results/edgeR/"
 files <- list.files(path = folder, pattern = ".tsv")
 
@@ -49,46 +52,55 @@ db_hallmarks  <- gmtPathways("resource/ref/msigdb_v2024.1.Hs_GMTs/h.all.v2024.1.
 db_go         <- gmtPathways("resource/ref/msigdb_v2024.1.Hs_GMTs/c5.all.v2024.1.Hs.symbols.gmt")
 db_reactome   <- gmtPathways("resource/ref/msigdb_v2024.1.Hs_GMTs/c2.cp.reactome.v2024.1.Hs.symbols.gmt")
 
+
+  
 for(file in files){
   filename <- sub(pattern = "(.*).tsv", replacement = "\\1", basename(file))
-  df <- read_tsv(paste0(folder, file))
   
-  res <- inner_join(x = df, ens2symbol, by = c("Ensembl_id" =  "ENSEMBL")) %>% 
-    dplyr::select(SYMBOL, logFC, PValue, FDR) %>% 
-    na.omit() %>% 
-    distinct()
+  df <- readr::read_tsv(paste0(folder, file), col_names = TRUE)
+  # assign(paste0(filename, "_auto"), df)
   
+  res <- df %>% dplyr::select(Ensembl_id, logFC, PValue, FDR) 
+  names(res)[1] <- "SYMBOL"
+  
+  # assign(paste0(filename, "_res"), res)
   res_uniq <- res[!duplicated(res[, "SYMBOL"]), ]
   
+  # assign(paste0(filename, "_res_uniq"), res_uniq)
+   
   ranks <- data.frame(SYMBOL = res_uniq$SYMBOL, Log2FC = res_uniq$logFC * -log10(res_uniq$PValue))
-  
+  # 
   ranks <- ranks[order(-ranks$Log2FC), ]
   ranks <- ranks[!is.na(ranks$Log2FC), ]
   
+  # assign(paste0(filename, "_ranks"), ranks)
+  
   ranks2 <- deframe(ranks)
+  
+  # assign(paste0(filename, "_ranks2"), ranks2)
   
   fgseaRes <- fgsea(pathways = db_go, stats = ranks2)
   
   dirOut <- paste0("workflow/results/edgeR/fGSEA/")
   if(!file.exists(dirOut)) { dir.create(path = dirOut, recursive = TRUE) }
-  
-  
+  # 
+  # 
   # Output files - save
   readr::write_tsv(x = data.frame(fgseaRes),
-                   file = paste0(dirOut, filename, "_fGSEA.tsv"))
+                    file = paste0(dirOut, filename, "_fGSEA.tsv"))
   xlsx::write.xlsx(x = data.frame(fgseaRes[, 1:7]),
-                   file = paste0(dirOut, filename, "_fGSEA.xlsx"), row.names = FALSE)
-
-  
-  # Tidy results
-  fgseaResTidy <- fgseaRes %>% 
-    as_tibble() %>% 
-    arrange(desc(NES))
-  
-  # Presenting in a nice table
-  fgseaResTidy %>% 
-    dplyr::select(-c(leadingEdge, ES, log2err)) %>% 
-    arrange(padj) %>% 
-    DT::datatable()
+                    file = paste0(dirOut, filename, "_fGSEA.xlsx"), row.names = FALSE)
+  # 
+  # 
+  # # Tidy results
+  # fgseaResTidy <- fgseaRes %>% 
+  #   as_tibble() %>% 
+  #   arrange(desc(NES))
+  # 
+  # # Presenting in a nice table
+  # fgseaResTidy %>% 
+  #   dplyr::select(-c(leadingEdge, ES, log2err)) %>% 
+  #   arrange(padj) %>% 
+  #   DT::datatable()
   
 }

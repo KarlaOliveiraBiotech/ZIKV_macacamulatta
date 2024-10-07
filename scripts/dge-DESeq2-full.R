@@ -53,6 +53,7 @@ lib_spec <- lib_spec %>%
 ########## Prep lib_spec ##########
 
 
+
 ########## Decide factors ##########
 lib_spec$Timepoint <- factor(lib_spec$Timepoint, 
                              levels = c("Dm14", "D1", "D3", 
@@ -83,40 +84,6 @@ all(rownames(lib_spec) == colnames(df))
 old_df <- df
 ########## Prep df ##########
 
-########## Basic analysis ##########
-dirOut <- paste0("workflow/results/DESeq2/")
-if(!file.exists(dirOut)) { dir.create(path = dirOut, recursive = T) }
-
-###### 1. CPM of raw data ######
-cpm <- cpm(df, log = TRUE, prior.count = 1, normalized.lib.sizes = TRUE)
-min(cpm)
-
-png(filename = paste0(dirOut, "/log2cpm_boxplot.png"))
-boxplot(cpm, xlab="", ylab="Log2 counts per million",las=2)
-abline(h=median(cpm),col="blue")
-title("Boxplots of log2CPMs")
-dev.off()
-
-
-###### 2. PCA of raw data ######
-pca <- prcomp(t(cpm))
-
-pcaPlot <- autoplot(pca, data = lib_spec, colour = "Timepoint", shape = "Animal", size = 3) +
-  ggtitle("PCA") + 
-  theme(plot.title = element_text(hjust=0.5)) # Without clustering
-
-pcaPlot2 <- autoplot(pca, data = lib_spec, colour = "Timepoint", shape = "Animal", size = 4, frame = TRUE) + 
-  ggtitle("PCA - clustering") + 
-  theme(plot.title = element_text(hjust=0.5)) # With clustering (frame)
-
-
-
-ggsave(filename = paste0(dirOut, "/", "PCA_nocluster.png"), plot = pcaPlot)
-ggsave(filename = paste0(dirOut, "/", "PCA_nocluster.pdf"), plot = pcaPlot)
-
-ggsave(filename = paste0(dirOut, "/", "PCA_cluster.png"), plot = pcaPlot2)
-ggsave(filename = paste0(dirOut, "/", "PCA_cluster.png"), plot = pcaPlot2)
-########## Basic analysis ##########
 
 
 ########## DESeq2 - prep ##########
@@ -148,18 +115,7 @@ for(Timepoint in lib_spec %>%
   tp_contrasts <- c("Timepoint", timepoint, control)
   res <- results(dds, contrast = tp_contrasts, alpha = 0.05, 
                  pAdjustMethod = "BH")
-  # res$Direction <- ifelse(test = res$log2FoldChange > 1 & 
-  #                              res$padj < 0.05 & 
-  #                              res$baseMean > 0, 
-  #                            yes = "Up", 
-  #                            no = ifelse(test = res$log2FoldChange < -1 &
-  #                                          res$padj < 0.05 & 
-  #                                          res$baseMean > 0, 
-  #                                        yes = "Down", no = "None"))
-  # 
-  # 
-  # assign(paste0("resLFC_", timepoint, "_vs_", control, "_unshrunken"), res)
-  
+
   
   resultsNames(dds)
   
@@ -188,6 +144,8 @@ for(Timepoint in lib_spec %>%
                                              yes = "Down",
                                              no = "None"))
   
+  
+  #resLFC$DirectionPadj <- replace(resLFC$Direction, is.na(resLFC$Direction), "None")
   
   assign(paste0("resLFC_", timepoint, "_vs_", control), resLFC)
   
