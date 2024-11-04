@@ -88,8 +88,8 @@ db_btm                <- "resource/ref/curated/BTM_for_GSEA_20131008.gmt"
 
 
 ########## Choose background genes based on GMT's list##########
-file_gmt <- db_hallmarks # Choose GMT pathway to be tested according to previous names
-gmt_name <- gets_name(db_hallmarks) # Choose pathway to be tested according to previous names
+file_gmt <- db_reactome_level3 # Choose GMT pathway to be tested according to previous names
+gmt_name <- gets_name(db_reactome_level3) # Choose pathway to be tested according to previous names
 ########## Choose background genes ##########
 
 
@@ -106,6 +106,7 @@ rds_path <- "resource/ref/msigdb_v2024.1.Hs_GMTs/"
 ########## Analysis ##########
 for(file in files_dge){
   df <- read_tsv(file = paste0(dirIn, file))
+  #df <- read_tsv("workflow/results/DESeq2/D14_vs_Dm14.tsv")
   names(df)[1] <- "gene_symbol" 
   
   genes_in_data <- df$gene_symbol
@@ -142,6 +143,7 @@ for(file in files_dge){
   dirOut <- paste0("workflow/results/DESeq2/clusterProfiler/", background_genes, "/")
   if(!file.exists(dirOut)) { dir.create(path = dirOut, recursive = TRUE) }
   
+  #filename_cut <- "D14_vs_Dm14"
   filename_cut <- base::gsub(pattern = ".tsv", replacement = "", x = file)
   filename <- paste0(dirOut, filename_cut, "_", background_genes)
   

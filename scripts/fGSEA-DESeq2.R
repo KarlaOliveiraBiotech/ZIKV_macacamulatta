@@ -10,6 +10,7 @@ library("msigdbr")
 library("RColorBrewer")
 library("fgsea")
 library("biomaRt")
+library("data.table")
 ########## Load libraries ##########
 
 ########## Path and list of folders ##########
@@ -32,17 +33,15 @@ db_reactome_all   <- gmtPathways("resource/ref/msigdb_v2024.1.Hs_GMTs/c2.cp.reac
 db_go_bp          <- gmtPathways("resource/ref/msigdb_v2024.1.Hs_GMTs/c5.go.bp.v2024.1.Hs.symbols.gmt")        
 
 db_reactome_level3    <- gmtPathways("resource/ref/curated/ReactomePathwaysLevel3.gmt")
-db_reactome_level3_1  <- gmtPathways("resource/ref/curated/ReactomePathwaysLevel3WithLevel1.tsv")
 db_kegg_no_disease    <- gmtPathways("resource/ref/curated/KEGG_pathways_NO_diseases.gmt")
 db_btm                <- gmtPathways("resource/ref/curated/BTM_for_GSEA_20131008.gmt")
 ########## Possible pathways ##########
 
 
 ########## Choose pathway ##########
-chosen_pathway <- db_hallmarks # Choose pathway to be tested according to previous names
-pathway_name <- pathway_function(db_hallmarks) # Choose pathway to be tested according to previous names
+chosen_pathway <- db_btm # Choose pathway to be tested according to previous names
+pathway_name <- pathway_function(db_btm) # Choose pathway to be tested according to previous names
 ########## Choose pathway ##########
-
 
 ########## Analysis ##########
 for(file in files){
@@ -79,12 +78,20 @@ for(file in files){
   if(!file.exists(dirOut)) { dir.create(path = dirOut, recursive = TRUE) }
   
   # Saves fGSEA output files 
-  readr::write_tsv(x = data.frame(fgseaRes[order(-NES), ]),
-                   file = paste0(dirOut, filename, "_fGSEA.tsv"))
+  data.table::fwrite(x = fgseaRes[order(-NES),], 
+                     file = paste0(dirOut, filename, "_fGSEA.tsv"), 
+                     sep = "\t", 
+                     sep2 = c("", " ", ""))
+  
+  # readr::write_tsv(x = data.frame(fgseaRes[order(-NES), ]),
+  #                  file = paste0(dirOut, filename, "_fGSEA.tsv"), 
+  #                  sep = "\t", sep2 = c("", " ", ""))
   
   xlsx::write.xlsx(x = data.frame(fgseaRes[order(-NES), ][, 1:7]),
                    file = paste0(dirOut, filename, "_fGSEA.xlsx"), 
                    row.names = FALSE)
+  
+
   
   # Does over-representation pathways
   fg <- names(head(ranks2[order(ranks2, decreasing=TRUE)], 200))
@@ -92,8 +99,14 @@ for(file in files){
   foraRes <- fora(genes = fg, universe = bg, pathways = chosen_pathway)
   
   # Saves output files from over-representation analysis
-  readr::write_tsv(x = data.frame(foraRes),
-                   file = paste0(dirOut, filename, "_foraRes.tsv"))
+  data.table::fwrite(x = foraRes, 
+                     file = paste0(dirOut, filename, "_foraRes.tsv"), 
+                     sep = "\t", 
+                     sep2 = c("", " ", ""))
+  
+  
+  # readr::write_tsv(x = data.frame(foraRes),
+  #                  file = paste0(dirOut, filename, "_foraRes.tsv"))
   
   xlsx::write.xlsx(x = data.frame(fgseaRes[, 1:7]),
                    file = paste0(dirOut, filename, "_foraRes.xlsx"), 

@@ -73,7 +73,7 @@ anyDuplicated(df)
 
 df <- data.frame(df, row.names = 1)
 cn2 <- base::gsub(pattern = "X(.*)", replacement = "\\1", x = colnames(df))
-cn2 <- base::gsub(patter = "(00.)", replacement = "\\00-", x = cn2)
+cn2 <- base::gsub(pattern = "(00.)", replacement = "\\00-", x = cn2)
 colnames(df) <- cn2
 
 order <- old_lib_spec$Sample
