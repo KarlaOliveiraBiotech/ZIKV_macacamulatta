@@ -80,9 +80,10 @@ annot$Sample <- paste0("S", annot$Sample)
 
 ########## Run CEMiTool ##########
 cem <- cemitool(expr = expr_norm, annot = annot, gmt = db, interactions = int_df,
-                filter = TRUE, apply_vst = TRUE, network_type = "unsigned",
-                force_beta = TRUE,
+                filter = TRUE, apply_vst = TRUE, network_type = "signed",
+                cor_method = "pearson", force_beta = TRUE,
                 sample_name_column = "Sample", class_column = "Timepoint",
+                gsea_min_size = 15, gsea_max_size = 500,
                 merge_similar = FALSE, verbose = TRUE)
 
 

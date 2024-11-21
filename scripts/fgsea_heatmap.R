@@ -12,7 +12,7 @@ library('gplots')
 
 ########## Prepares the comparison dataframe ##########
 # Reads reactome_level3_with_level1 file
-db_reactome_level3_1 <- readr::read_tsv("resource/ref/curated/ReactomePathwaysLevel3WithLevel1.tsv")
+db_reactome_level3_1 <- readr::read_tsv(file = "../../resource/ref/curated/ReactomePathwaysLevel3WithLevel1.tsv")
 
 # Subsets immune system pathways
 immune_system <- db_reactome_level3_1 %>% 
@@ -22,7 +22,9 @@ immune_system <- db_reactome_level3_1 %>%
 ########## File for comparison (immune system) ##########
 
 ########## Path and list of folders ##########
-folder_fgsea <- "workflow/results/DESeq2/fGSEA/db_reactome_level3/"
+folder_fgsea <- "../results/DESeq2/fGSEA/db_reactome_level3/"
+
+
 files_fgsea <- list.files(path = folder_fgsea, pattern = "_fGSEA.tsv")
 ########## Path and list of folders ##########
 
@@ -38,7 +40,7 @@ for(file_enrich in files_fgsea){
     dplyr::filter(pathway %in% immune_system)
   
   # Save results
-  dirOut <- "workflow/results/DESeq2/fGSEA/leading_edges/reactome_level3/"
+  dirOut <- "../results/DESeq2/fGSEA/leading_edges/reactome_level3/"
   if(!file.exists(dirOut)) { dir.create(path = dirOut, recursive = TRUE) }
 
   data.table::fwrite(x = df_immune,
@@ -67,15 +69,15 @@ df_all <- list_df %>%
 names(df_all) <- c("D1", "D3", "D5", "D7", "D10", "D14")
 
 # Creates ans saves pheatmap plot
-png(filename = paste0("workflow/results/DESeq2/fGSEA/leading_edges/reactome_level3/", "Pheatmap_Enriched_ImmuneSystem.png"),
-    width = 1200, height = 1200)
+png(filename = paste0("../results/DESeq2/fGSEA/leading_edges/reactome_level3/", "Pheatmap_Enriched_ImmuneSystem.png"),
+    width = 1400, height = 1300)
 pheatmap(mat = df_all, 
          scale = "row", 
          cluster_rows = TRUE, 
          cluster_cols = FALSE,
          main = "NES values from Enriched Immune System Pathway",
          legend = TRUE, 
-         fontsize = 14)
+         fontsize = 18)
 dev.off()
 ########## Plot ##########
 

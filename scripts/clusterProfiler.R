@@ -18,7 +18,7 @@ library("ggrepel")
 ### Function: Barplot
 enrichres_barPlot <- function(x, y){
   tryCatch({
-    barPlot <- graphics::barplot(x, showCategory = 15) + ggtitle(paste0(filename_cut, " - ", y, "-regulated genes"))
+    barPlot <- graphics::barplot(x, showCategory = 15, font.size = 6) + ggtitle(paste0(filename_cut, " - ", y, "-regulated genes"))
     ggsave(filename = paste0(dirPlot, filename_cut, "_", y, "_barPlot.png"), plot = barPlot)
   }, error = function(msg){
     return(NA)
@@ -28,7 +28,7 @@ enrichres_barPlot <- function(x, y){
 ### Function: Dotplot
 enrichres_dotPlot = function(x, y){
   tryCatch({
-    dotPlot <- enrichplot::dotplot(x, showCategory = 15) + ggtitle(paste0(filename_cut, " - ", y, "-regulated genes"))
+    dotPlot <- enrichplot::dotplot(x, showCategory = 15, font.size = 6) + ggtitle(paste0(filename_cut, " - ", y, "-regulated genes"))
     ggsave(filename = paste0(dirPlot, filename_cut, "_", y, "_dotPlot.png"), plot = dotPlot)},
     error = function(msg){
       return(NA)
@@ -38,7 +38,7 @@ enrichres_dotPlot = function(x, y){
 ### Function: Cnetplot
 enrichres_cnetPlot = function(x, y){
   tryCatch({
-    cnetPlot <- enrichplot::cnetplot(x = x, showCategory = 5) +
+    cnetPlot <- enrichplot::cnetplot(x = x, showCategory = 5, font.size = 6) +
       ggtitle(paste0(filename_cut, " - ", y, "-regulated genes"))
     ggsave(filename = paste0(dirPlot, filename_cut, "_", y, "_cnetPlot.png"), plot = cnetPlot)},
     error = function(msg){
@@ -49,7 +49,7 @@ enrichres_cnetPlot = function(x, y){
 ### Function: Heatplot
 enrichres_heatPlot <- function(x, y){
   tryCatch({
-    heatPlot <- enrichplot::heatplot(x, showCategory = 5) + ggtitle(paste0(filename_cut, " - ", y, "-regulated genes"))
+    heatPlot <- enrichplot::heatplot(x, showCategory = 5, font.size = 6) + ggtitle(paste0(filename_cut, " - ", y, "-regulated genes"))
     ggsave(filename = paste0(dirPlot, filename_cut, "_", y, "_heatPlot.png"), plot = heatPlot)},
     error = function(msg){
       return(NA)
@@ -75,15 +75,14 @@ gets_name <- function(gmt) {
 
 
 ########## Listing GMTs ##########
-db_hallmarks    <- "resource/ref/msigdb_v2024.1.Hs_GMTs/h.all.v2024.1.Hs.symbols.gmt"
-db_go_all       <- "resource/ref/msigdb_v2024.1.Hs_GMTs/c5.all.v2024.1.Hs.symbols.gmt"
-db_reactome_all <- "resource/ref/msigdb_v2024.1.Hs_GMTs/c2.cp.reactome.v2024.1.Hs.symbols.gmt"
-db_go_bp        <- "resource/ref/msigdb_v2024.1.Hs_GMTs/c5.go.bp.v2024.1.Hs.symbols.gmt"        
+db_hallmarks    <- "../../resource/ref/msigdb_v2024.1.Hs_GMTs/h.all.v2024.1.Hs.symbols.gmt"
+db_go_all       <- "../../resource/ref/msigdb_v2024.1.Hs_GMTs/c5.all.v2024.1.Hs.symbols.gmt"
+db_reactome_all <- "../../resource/ref/msigdb_v2024.1.Hs_GMTs/c2.cp.reactome.v2024.1.Hs.symbols.gmt"
+db_go_bp        <- "../../resource/ref/msigdb_v2024.1.Hs_GMTs/c5.go.bp.v2024.1.Hs.symbols.gmt"        
 
-db_reactome_level3    <- "resource/ref/curated/ReactomePathwaysLevel3.gmt"
-db_reactome_level3_1  <- "resource/ref/curated/ReactomePathwaysLevel3WithLevel1.tsv"
-db_kegg_no_disease    <- "resource/ref/curated/KEGG_pathways_NO_diseases.gmt"
-db_btm                <- "resource/ref/curated/BTM_for_GSEA_20131008.gmt"
+db_reactome_level3    <- "../../resource/ref/curated/ReactomePathwaysLevel3.gmt"
+db_kegg_no_disease    <- "../../resource/ref/curated/KEGG_pathways_NO_diseases.gmt"
+db_btm                <- "../../resource/ref/curated/BTM_for_GSEA_20131008.gmt"
 ########## Possible pathways ##########
 
 
@@ -95,18 +94,18 @@ gmt_name <- gets_name(db_reactome_level3) # Choose pathway to be tested accordin
 
 ########## Set folders and path ##########
 # For input
-dirIn <- "workflow/results/DESeq2/"
+dirIn <- "../results/DESeq2/"
 files_dge <- list.files(path = dirIn, pattern = ".tsv")
 
 # For saving RDS file
-rds_path <- "resource/ref/msigdb_v2024.1.Hs_GMTs/" 
+rds_path <- "../../resource/ref/msigdb_v2024.1.Hs_GMTs/" 
 ########## Set folders and path ##########
 
 
 ########## Analysis ##########
 for(file in files_dge){
   df <- read_tsv(file = paste0(dirIn, file))
-  #df <- read_tsv("workflow/results/DESeq2/D14_vs_Dm14.tsv")
+  #df <- read_tsv("../results/DESeq2/D14_vs_Dm14.tsv")
   names(df)[1] <- "gene_symbol" 
   
   genes_in_data <- df$gene_symbol
@@ -132,7 +131,7 @@ for(file in files_dge){
   deg_results_list <- split(df_diffexp, df_diffexp$DirectionPadj)
   
   
-  bg_genes <- readRDS(paste0("resource/ref/msigdb_v2024.1.Hs_GMTs/", rds))
+  bg_genes <- readRDS(paste0("../../resource/ref/msigdb_v2024.1.Hs_GMTs/", rds))
   padj_cutoff <- 0.05
   genecount_cutoff <- 5 # Minimum number of genes in the pathway, used to filter out pathways
   
@@ -140,7 +139,7 @@ for(file in files_dge){
   
   
   # Set folder to save output
-  dirOut <- paste0("workflow/results/DESeq2/clusterProfiler/", background_genes, "/")
+  dirOut <- paste0("../results/DESeq2/clusterProfiler/", background_genes, "/")
   if(!file.exists(dirOut)) { dir.create(path = dirOut, recursive = TRUE) }
   
   #filename_cut <- "D14_vs_Dm14"
@@ -215,7 +214,7 @@ for(file in files_dge){
   
   
     # Set folder to save plots
-    dirPlot <- paste0("workflow/results/DESeq2/clusterProfiler/", background_genes, "/Plots/")
+    dirPlot <- paste0("../results/DESeq2/clusterProfiler/", background_genes, "/Plots/")
     if(!file.exists(dirPlot)) { dir.create(path = dirPlot, recursive = TRUE) }
   
   
